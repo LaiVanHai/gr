@@ -54,7 +54,6 @@ K = 150
 max_local = [] # luu vi tri cua cac cuc dai dia phuong
 time_start = 0
 time_end = 0
-local_time_length = 0
 data_output = []
 basic_frequency_result = []
 
@@ -138,7 +137,7 @@ def stacking(data1, data2):
   # xep chong data 1 vao data 2
   size1 = len(data1)
   size2 = len(data2)
-  break_point = int(size2/5)
+  break_point = int(size2/3)
 
   point = size1 - break_point
   j = -1 # bien duyet mang data 2
@@ -158,7 +157,6 @@ def speech_process(data, npoint, srate):
   global max_local
   global time_start
   global time_end
-  global local_time_length
   global data_output
   global frame_time
   global basic_frequency_result
@@ -170,24 +168,23 @@ def speech_process(data, npoint, srate):
   # print("bat dau am thanh:", arr_start)
   # print("ket thuc am thanh:", arr_end)
   # jump_length = (int)(local_time_length*srate/1000)
-  jump_length = local_time_length
+  jump_length = int(srate/80)
+  from_max_length = int(srate/450)
 
   t = 0 # dem so lan quet
   max = 0 # luu gia tri cuc dai
   t_max = 0 # luu vi tri cuc dai
   max_local = []
   r_sound = [] # tinh tan so co ban
+  k = 0
+  start = 0
+  end = start+jump_length
 
-  for i in range(arr_start, arr_end, 1):
-    if t < jump_length:
-      t = t + 1
-      if (max < data[i]):
-        t_max = i
-        max = data[i]
-    else:
-      max_local.append(t_max)
-      t = 0
-      max = 0
+  while (end < arr_end):
+    t_max = np.argmax(data[(start + from_max_length):end])
+    start = t_max + start + from_max_length
+    max_local.append(start)
+    end = start + jump_length
 
   print("jump length:",jump_length)
   print("max_local_array:",len(max_local))
@@ -359,13 +356,7 @@ textBox.grid(row=2, column=0)
 buttonCommit=Button(f1, height=1, width=5, text="Commit",
   command=lambda: retrieveInput())
 buttonCommit.grid(row=2, column=1)
-# btnExit = Button(f1,text="Quit",bd=10,bg="pink", command=lambda: exitProgram()).grid(row=8, column=0)
-#==========Nhap do dai dia phuong============
-textBox2=Text(f1, height=2, width=15)
-textBox2.grid(row=3, column=0)
-buttonCommit2=Button(f1, height=1, width=5, text="Send",
-  command=lambda: retrieveInput2())
-buttonCommit2.grid(row=3, column=1)
+btnExit = Button(f1,text="Quit",bd=10,bg="pink", command=lambda: exitProgram()).grid(row=8, column=0)
 #=======================ve do thi=======================
 fig = plt.figure(1)
 t = np.arange(0.0,3.0,0.01)
