@@ -45,7 +45,7 @@ def write_file(file_name, data, srate):
     rlbl.pack()
     r.mainloop()
 
-def playWav():
+def playWav(sound_file):
   if sound_file != "":
     spf = wave.open(sound_file,'r')
     mixer.init(spf.getframerate())
