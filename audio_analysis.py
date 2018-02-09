@@ -106,7 +106,10 @@ def draw_chart_basic_frequency():
   dc.draw_chart_basic_frequency(sound_file, frame_time, const_sound)
 
 def speech_process():
-  sp.speech_process(sound_file, frame_time, const_sound)
+  sp.speech_process(sound_file, frame_time, const_sound, "ThanhSac")
+
+def playWav():
+  fil.playWav(sound_file)
 
 #==========================Button===================n======
 textBox=Text(f1, height=2, width=15)

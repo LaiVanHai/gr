@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 import operation_file as fil
 import check_silence as cs
 import basic_frequency as bf
+import tone_change as tc
 
-def stacking(data1, data2):
-  # xep chong data 1 vao data 2
+def stacking(data1, data2, count_stack, stacking_count):
+  # xep chong data 1 vao data 2, theo ty le xep chong count_stack/stacking_count
   size1 = len(data1)
   size2 = len(data2)
-  break_point = int(size2/3)
+  break_point = int(size2*count_stack/stacking_count)
 
   point = size1 - break_point
   j = -1 # bien duyet mang data 2
@@ -25,8 +26,9 @@ def stacking(data1, data2):
   return data1
 
 
-def speech_process(sound_file, frame_time, const_sound):
-  # truyen vao: ten file, do dai frame, nguong am thanh
+def speech_process(sound_file, frame_time, const_sound, tone_string):
+  # truyen vao: ten file, do dai frame, nguong am thanh, nhan vao thanh bien doi
+
 
   return_value_open_file = fil.read_file(sound_file)
   data = return_value_open_file[0]
@@ -52,6 +54,9 @@ def speech_process(sound_file, frame_time, const_sound):
   start = 0
   end = start+jump_length
   data_output = [] # luu du lieu sau khi xu ly
+  count_stack = 0 # dem so lan da duoc xep chong
+  stacking_count = 0 # tong so lan xep chong
+
 
   while (end < arr_end):
     t_max = np.argmax(data[(start + from_max_length):end])
@@ -61,6 +66,11 @@ def speech_process(sound_file, frame_time, const_sound):
 
   print("jump length:",jump_length)
   print("max_local_array:",len(max_local))
+
+  stacking_count = len(max_local) - 1
+  return_value = tc.init_tone(stacking_count, tone_string)
+  count_stack = return_value[0]
+  stacking_count = return_value[1]
 
   for i in range(0, len(max_local)-1, 1):
     print(max_local[i])
@@ -93,35 +103,12 @@ def speech_process(sound_file, frame_time, const_sound):
       data_output_sub.append(value)
 
     if (data_output):
-      data_output = stacking(data_output, data_output_sub)
+      count_stack = tc.tone_change(count_stack, tone_string)
+      print("Count stack: ", count_stack)
+      data_output = stacking(data_output, data_output_sub, count_stack, stacking_count)
     else:
       data_output = data_output_sub
 
-    data_output_sub = []
-
-    max0 = data[max_local[j]] # max cua frame dang xet
-    max1 = 0 # max cuar hamming
-    hamming_arr = []
-
-    if (max0 < data[max_local[j+1]]):
-      max0 = data[max_local[j+1]]
-    if (max0 < data[max_local[j+2]]):
-      max0 = data[max_local[j+2]]
-
-    hamming_arr = np.hamming(max_local[j+2] - max_local[j] + 1)
-    size = max_local[j+2] - max_local[j]
-    for k in range(0, size, 1):
-      if (max1 < hamming_arr[k]):
-        max1 = hamming_arr[k]
-
-    ratio = max1/max0  # ty le giua 2 gia tri cuc dai
-    size = -1
-    for k in range(max_local[j], max_local[j+2], 1):
-      size += 1
-      value = hamming_arr[size]/ratio*data[k]
-      data_output_sub.append(value)
-
-    data_output = stacking(data_output, data_output_sub)
     data_output_sub = []
 
     i += 1
